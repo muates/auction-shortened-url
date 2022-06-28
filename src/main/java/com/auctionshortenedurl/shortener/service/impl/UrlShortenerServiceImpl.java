@@ -1,5 +1,6 @@
 package com.auctionshortenedurl.shortener.service.impl;
 
+import com.auctionshortenedurl.exception.EntityExistsException;
 import com.auctionshortenedurl.exception.NotFoundException;
 import com.auctionshortenedurl.shortener.converter.UrlRequestConverter;
 import com.auctionshortenedurl.shortener.model.entity.UrlEntity;
@@ -32,7 +33,17 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
 
     @Override
     public UrlEntity createShortUrl(Long userId, UrlShortenerRequest request) {
-        String shortUrl = createShortenerUrl(request.getLongUrl());
+        List<UrlEntity> urlEntityList = urlShortenerRepository.findAllByUserId(userId);
+
+        if (!CollectionUtils.isEmpty(urlEntityList)) {
+            urlEntityList.forEach(urlEntity -> {
+                if (Objects.equals(urlEntity.getLongUrl(), request.getLongUrl())) {
+                    throw new EntityExistsException("Url already exist: " + request.getLongUrl());
+                }
+            });
+        }
+
+        String shortUrl = createShortenerUrl(userId, request.getLongUrl());
         UrlEntity urlEntity = urlRequestConverter.convert(userId, shortUrl, request);
         return urlShortenerRepository.save(urlEntity);
     }
@@ -77,8 +88,8 @@ public class UrlShortenerServiceImpl implements UrlShortenerService {
         urlShortenerRepository.delete(urlEntity);
     }
 
-    private String createShortenerUrl(String longUrl) {
-        return SHORT_URL_BASE + longUrl.hashCode();
+    private String createShortenerUrl(Long userId, String longUrl) {
+        return SHORT_URL_BASE + longUrl.hashCode() + userId;
     }
 
 }

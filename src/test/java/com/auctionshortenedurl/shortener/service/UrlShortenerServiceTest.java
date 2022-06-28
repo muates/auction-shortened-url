@@ -13,6 +13,7 @@ import com.auctionshortenedurl.shortener.model.request.UrlShortenerRequest;
 import com.auctionshortenedurl.shortener.repository.UrlShortenerRepository;
 import com.auctionshortenedurl.shortener.service.impl.UrlShortenerServiceImpl;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -21,11 +22,12 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 
 public class UrlShortenerServiceTest {
 
     private static final String LONG_URL = "https://www.tapu.com/l/uygulamaya-ozel-kampanyali-tapular";
-    private static final String SHORT_URL = "http://localhost:8080/613339777";
+    private static final String SHORT_URL = "http://localhost:8080/6133397771000";
     private static final Long USER_ID = 1000L;
 
     @InjectMocks
@@ -44,28 +46,30 @@ public class UrlShortenerServiceTest {
 
     @Test
     public void testCrateShortUrl() {
-        UrlShortenerRequest urlShortenerRequest = new UrlShortenerRequest();
-        urlShortenerRequest.setLongUrl(LONG_URL);
+        UrlShortenerRequest request = new UrlShortenerRequest();
+        request.setLongUrl(LONG_URL);
 
         UrlEntity urlEntity = new UrlEntity();
+        urlEntity.setLongUrl(request.getLongUrl());
         urlEntity.setShortUrl(SHORT_URL);
-        urlEntity.setLongUrl(LONG_URL);
         urlEntity.setUserId(USER_ID);
 
-        UrlEntity existUrlEntity = new UrlEntity();
-        existUrlEntity.setShortUrl(SHORT_URL);
-        existUrlEntity.setLongUrl(LONG_URL);
-        existUrlEntity.setUserId(USER_ID);
+        UrlEntity savedUrlEntity = new UrlEntity();
+        savedUrlEntity.setShortUrl(SHORT_URL);
+        savedUrlEntity.setLongUrl(LONG_URL);
+        savedUrlEntity.setUserId(USER_ID);
+        savedUrlEntity.setId(1L);
 
-        when(urlRequestConverter.convert(USER_ID, SHORT_URL, urlShortenerRequest)).thenReturn(urlEntity);
-        when(urlShortenerRepository.save(urlEntity)).thenReturn(existUrlEntity);
+        when(urlShortenerRepository.findAllByUserId(USER_ID)).thenReturn(Collections.emptyList());
+        when(urlRequestConverter.convert(USER_ID, SHORT_URL, request)).thenReturn(urlEntity);
+        when(urlShortenerRepository.save(urlEntity)).thenReturn(savedUrlEntity);
 
-        UrlEntity response = urlShortenerService.createShortUrl(USER_ID, urlShortenerRequest);
+        UrlEntity response = urlShortenerService.createShortUrl(USER_ID, request);
 
         assertNotNull(response);
-        assertEquals(existUrlEntity.getShortUrl(), response.getShortUrl());
-
-        verify(urlRequestConverter, times(1)).convert(USER_ID, SHORT_URL, urlShortenerRequest);
+        assertEquals(savedUrlEntity, response);
+        verify(urlShortenerRepository, times(1)).findAllByUserId(USER_ID);
+        verify(urlRequestConverter, times(1)).convert(USER_ID, SHORT_URL, request);
         verify(urlShortenerRepository, times(1)).save(urlEntity);
     }
 
