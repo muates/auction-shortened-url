@@ -1,7 +1,6 @@
 package com.auctionshortenedurl.user.service.impl;
 
 import com.auctionshortenedurl.user.converter.UserRequestConverter;
-import com.auctionshortenedurl.user.model.dto.UserDto;
 import com.auctionshortenedurl.user.model.entity.UserEntity;
 import com.auctionshortenedurl.user.model.request.UserRequest;
 import com.auctionshortenedurl.user.repository.UserRepository;
@@ -23,16 +22,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto signUp(UserRequest userRequest) {
+    public UserEntity signUp(UserRequest userRequest) {
         UserEntity userEntity = userRequestConverter.convert(userRequest);
-        userRepository.save(userEntity);
-
-        return convertToResponse(userEntity.getUserId());
+        return userRepository.save(userEntity);
     }
 
-    private UserDto convertToResponse(Long userId) {
-        UserDto user = new UserDto();
-        user.setUserId(userId);
-        return user;
-    }
 }
