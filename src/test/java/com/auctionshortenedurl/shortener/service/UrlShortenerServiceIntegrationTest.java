@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import com.auctionshortenedurl.shortener.model.entity.UrlEntity;
 import com.auctionshortenedurl.shortener.model.request.UrlLongRequest;
 import com.auctionshortenedurl.shortener.model.request.UrlShortenerRequest;
-import com.auctionshortenedurl.shortener.service.impl.UrlShortenerServiceImpl;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,13 +20,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class UrlShortenerServiceIntegrationTest {
 
-    private static final String LONG_URL = "https://www.tapu.com/l/uygulamaya-ozel-kampanyali-tapular2";
-    private static final String SHORT_URL = "http://localhost:8080/1833663953";
+    private static final String LONG_URL = "https://www.tapu.com/l/uygulamaya-ozel-kampanyali-tapular";
+    private static final String SHORT_URL = "http://localhost:8080/6133397773";
     private static final Long USER_ID = 3L;
-    private static final Long URL_ID = 8L;
+    private static final Long URL_ID = 3L;
 
     @Autowired
-    private UrlShortenerServiceImpl urlShortenerService;
+    private UrlShortenerService urlShortenerService;
 
     @Test
     public void testCreateShortUrl() {
